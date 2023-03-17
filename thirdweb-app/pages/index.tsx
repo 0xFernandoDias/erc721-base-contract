@@ -1,55 +1,74 @@
-import { ConnectWallet } from "@thirdweb-dev/react";
-import type { NextPage } from "next";
-import styles from "../styles/Home.module.css";
+import {
+	ThirdwebNftMedia,
+	Web3Button,
+	useContract,
+	useContractRead,
+	useNFTs,
+} from "@thirdweb-dev/react"
+import type { NextPage } from "next"
 
 const Home: NextPage = () => {
-  return (
-    <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="http://thirdweb.com/">thirdweb</a>!
-        </h1>
+	const { contract } = useContract("0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848")
 
-        <p className={styles.description}>
-          Get started by configuring your desired network in{" "}
-          <code className={styles.code}>pages/_app.tsx</code>, then modify the{" "}
-          <code className={styles.code}>pages/index.tsx</code> file!
-        </p>
+	// The name of the smart contract
+	const { data: contractName } = useContractRead(contract, "name")
+	// Another way to do it:
+	// contract?.call("name", "0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848")
 
-        <div className={styles.connect}>
-          <ConnectWallet />
-        </div>
+	// Write and read the contract from the dashboard https://thirdweb.com/goerli/0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848/explorer
 
-        <div className={styles.grid}>
-          <a href="https://portal.thirdweb.com/" className={styles.card}>
-            <h2>Portal &rarr;</h2>
-            <p>
-              Guides, references and resources that will help you build with
-              thirdweb.
-            </p>
-          </a>
+	// const { mutateAsync: setContractName } = useContractWrite(contract, "setName")
 
-          <a href="https://thirdweb.com/dashboard" className={styles.card}>
-            <h2>Dashboard &rarr;</h2>
-            <p>
-              Deploy, configure and manage your smart contracts from the
-              dashboard.
-            </p>
-          </a>
+	console.log("Hello Metaverse, the contract name is:", contractName)
+	// Hello Metaverse, the contract name is: Awesome NFTs
 
-          <a
-            href="https://portal.thirdweb.com/templates"
-            className={styles.card}
-          >
-            <h2>Templates &rarr;</h2>
-            <p>
-              Discover and clone template projects showcasing thirdweb features.
-            </p>
-          </a>
-        </div>
-      </main>
-    </div>
-  );
-};
+	const { data: nfts, isLoading, error } = useNFTs(contract)
 
-export default Home;
+	return (
+		<>
+			{isLoading ? (
+				<>Loading...</>
+			) : (
+				nfts?.map((nft) => {
+					return (
+						<>
+							<p>{nft.metadata.name}</p>
+							<ThirdwebNftMedia
+								key={nft.metadata.id.toString()}
+								metadata={nft.metadata}
+								style={{ width: 200 }}
+							/>
+						</>
+					)
+				})
+			)}
+
+			<div style={{ maxWidth: 200 }}>
+				{/* <ConnectWallet /> */}
+				<Web3Button
+					contractAddress="0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848"
+					// Same thing as going to https://thirdweb.com/goerli/0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848/nfts and click on "+ Mint", the name, description, and the image are required
+					action={(contract) =>
+						contract.erc721.mint({
+							name: "My NFT",
+							description: "This is my NFT",
+							image:
+								"https://portal.thirdweb.com/img/thirdweb-logo-transparent-white.svg",
+						})
+					}
+					// contractAbi={[{ ... }]}
+					// overrides={{}}
+					// onSuccess={(result) => alert("Success!")}
+					// onError={(error) => alert("Something went wrong!")}
+					// onSubmit={() => console.log("Transaction submitted")}
+					// isDisabled
+					// className="my-custom-class"
+				>
+					Mint an NFT
+				</Web3Button>
+			</div>
+		</>
+	)
+}
+
+export default Home
