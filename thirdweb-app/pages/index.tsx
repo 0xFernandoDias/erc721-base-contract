@@ -6,6 +6,7 @@ import {
 	useNFTs,
 } from "@thirdweb-dev/react"
 import type { NextPage } from "next"
+import Link from "next/link"
 
 const Home: NextPage = () => {
 	const { contract } = useContract("0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848")
@@ -19,28 +20,58 @@ const Home: NextPage = () => {
 
 	// const { mutateAsync: setContractName } = useContractWrite(contract, "setName")
 
-	console.log("Hello Metaverse, the contract name is:", contractName)
+	// console.log("Hello Metaverse, the contract name is:", contractName)
 	// Hello Metaverse, the contract name is: Awesome NFTs
 
 	const { data: nfts, isLoading, error } = useNFTs(contract)
 
 	return (
-		<>
+		<div
+			style={{
+				minHeight: "100vh",
+				padding: "4rem 0",
+				flex: "1",
+				display: "flex",
+				flexDirection: "column",
+				justifyContent: "center",
+				alignItems: "center",
+			}}
+		>
+			<>
+				Contract:{" "}
+				<Link href="https://thirdweb.com/goerli/0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848">
+					0x4c9AA8F1970f3dF3E0316D3171E86c5F906EC848
+				</Link>
+			</>
 			{isLoading ? (
 				<>Loading...</>
 			) : (
-				nfts?.map((nft) => {
-					return (
-						<>
-							<p>{nft.metadata.name}</p>
-							<ThirdwebNftMedia
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "row",
+						flexWrap: "wrap",
+						minWidth: "80%",
+						gap: "10%",
+						justifyContent: "center",
+						margin: "16px",
+					}}
+				>
+					{nfts?.map((nft) => {
+						return (
+							<div
+								style={{ display: "flex", flexDirection: "column" }}
 								key={nft.metadata.id.toString()}
-								metadata={nft.metadata}
-								style={{ width: 200 }}
-							/>
-						</>
-					)
-				})
+							>
+								<ThirdwebNftMedia
+									metadata={nft.metadata}
+									style={{ width: 200 }}
+								/>
+								<p>{nft.metadata.name}</p>
+							</div>
+						)
+					})}
+				</div>
 			)}
 
 			<div style={{ maxWidth: 200 }}>
@@ -67,7 +98,7 @@ const Home: NextPage = () => {
 					Mint an NFT
 				</Web3Button>
 			</div>
-		</>
+		</div>
 	)
 }
 
